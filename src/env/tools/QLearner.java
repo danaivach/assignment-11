@@ -51,10 +51,10 @@ public class QLearner extends Artifact {
 *</p>
 * @param  goalDescription  the desired goal against the which the Q matrix is calculated (e.g., [2,3])
 * @param  episodes the number of episodes used for calculating the Q matrix
-* @param  alpha
-* @param  gamma
-* @param epsilon
-* @param reqard the reward assigned when reaching the goal state
+* @param  alpha the learning rate with range [0,1].
+* @param  gamma the discount factor [0,1]
+* @param epsilon the exploration probability [0,1]
+* @param reward the reward assigned when reaching the goal state
 */
   @OPERATION
   public void calculateQ(Object[] goalDescription , Object episodes, Object alpha, Object gamma, Object epsilon, Object reward) {
@@ -81,7 +81,7 @@ public class QLearner extends Artifact {
       while(!goalStates.contains(currentState)) {
 
         List<Integer> applicableActions =  this.lab.getApplicableActions(currentState);
-        LOGGER.info("Applicable actions: " + applicableActions);
+        //LOGGER.info("Applicable actions: " + applicableActions);
 
         int action;
         if (rd.nextDouble() < Double.valueOf(epsilon.toString())){
@@ -95,12 +95,15 @@ public class QLearner extends Artifact {
         //LOGGER.info("Performed action: " + action);
 
         currentState = this.lab.readCurrentState();
-        LOGGER.info("Current state: " + currentState);
+        //LOGGER.info("Current state: " + currentState);
 
-        qTable[currentState][action] = qTable[currentState][action] + (Double.valueOf(reward.toString()) + ((double) gamma)*maxQ(qTable, currentState, applicableActions)[1]);
+        Double a = Double.valueOf(alpha.toString());
+        qTable[currentState][action] = (1-a)*qTable[currentState][action] + a*((Double.valueOf(reward.toString()) + ((double) gamma)*maxQ(qTable, currentState, applicableActions)[1]));
 
       }
     }
+
+    LOGGER.info("Q learning is completed");
     printQTable(qTable);
     for (int goalState : goalStates) {
       qTables.put(goalState, qTable);
@@ -129,7 +132,13 @@ public class QLearner extends Artifact {
         return actionQPair;
     }
 
-  //provided
+
+
+    /**
+    * Print the Q matrix
+    *
+    * @param qTable the Q matrix
+    */
   void printQTable(double[][] qTable) {
     System.out.println("Q matrix");
     for (int i = 0; i < qTable.length; i++) {
@@ -141,7 +150,11 @@ public class QLearner extends Artifact {
     }
   }
 
- // provided
+  /**
+  * Initialize a Q matrix
+  *
+  * @return the Q matrix
+  */
  private double[][] initializeQTable() {
     double[][] qTable = new double[this.stateCount][this.actionCount];
     for (int i = 0; i < stateCount; i++){
