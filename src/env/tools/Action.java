@@ -1,35 +1,43 @@
 package tools;
 
+import java.util.Arrays;
 import ch.unisg.ics.interactions.wot.td.clients.TDHttpRequest;
 
 public class Action {
 
-  private final String relatedAffordanceType;
-  private final String propertyType;
-  private final Boolean propertyValue;
+  private final String actionTag;
+  private final Object[] payloadTags;
+  private final Object[] payload;
   private final TDHttpRequest request;
 
   private int applicableOnStateAxis;
   private int applicableOnStateValue;
 
-  public Action(String relatedAffordanceType, String propertyType,
-    Boolean propertyValue, TDHttpRequest request) {
-      this.relatedAffordanceType = relatedAffordanceType;
-      this.propertyType = propertyType;
-      this.propertyValue = propertyValue;
+  public Action(String actionTag, Object[] payloadTags,
+    Object[] payload, TDHttpRequest request) {
+      this.actionTag = actionTag;
+      this.payloadTags = payloadTags;
+      this.payload = payload;
       this.request = request;
     }
 
-  public String getRelatedAffordanceType() {
-    return this.relatedAffordanceType;
+  @Override
+  public String toString() {
+    return "Action Tag: " + this.actionTag +
+    ", Payload Tags: " + Arrays.toString(this.payloadTags) +
+    ", Payload: " + Arrays.toString(this.payload);
   }
 
-  public String getPropertyType() {
-    return this.propertyType;
+  public String getActionTag() {
+    return this.actionTag;
   }
 
-  public Boolean getPropertyValue() {
-    return this.propertyValue;
+  public Object[] getPayloadTags() {
+    return this.payloadTags;
+  }
+
+  public Object[] getPayload() {
+    return this.payload;
   }
 
   public TDHttpRequest getRequest() {

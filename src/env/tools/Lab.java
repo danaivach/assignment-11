@@ -109,21 +109,26 @@ public class Lab extends LearningEnvironment {
 
   static {
 
+    // possible substates for z1Level, z2Level, sunshine
     for (int i=0; i<4; i++) {
       z1Level.put(i,i);
       z2Level.put(i,i);
       sunshine.put(i,i);
     }
 
+    // possible substates for z1Light
     z1Light.put(0, false);
     z1Light.put(1, true);
 
+    // possible substates for z2Light
     z2Light.put(0, false);
     z2Light.put(1, true);
 
+    // possible substates for z1Blinds
     z1Blinds.put(0, false);
     z1Blinds.put(1, true);
 
+    // possible substates for z2Blinds
     z2Blinds.put(0, false);
     z2Blinds.put(1, true);
 
@@ -145,6 +150,8 @@ public class Lab extends LearningEnvironment {
         // Create the state space
         createStateSpace();
         LOGGER.info("The lab has a state space of n="+ stateSpace.size());
+
+        // Print the states of the state space
         LOGGER.info(String.valueOf(stateSpace));
 
         // Create the action space
@@ -153,15 +160,12 @@ public class Lab extends LearningEnvironment {
 
         // Print the actions of the action space
         for (Action action : actionSpace.values()) {
-          LOGGER.info(
-          "Action affordance: " + action.getRelatedAffordanceType() +
-          ", property: " + action.getPropertyType() +
-          ", value: " + action.getPropertyValue()
-          );
+          LOGGER.info(action.toString());
         }
 
+        // Read the current state
         readCurrentState();
-        LOGGER.info("Initialized with current state: " + this.currentState);
+        LOGGER.info("The lab current state: " + this.currentState);
 
       } catch (IOException e) {
         LOGGER.severe(e.getMessage());
@@ -172,23 +176,28 @@ public class Lab extends LearningEnvironment {
     * @see {@link LearningEnvironment#getCompatibleStates(List)}
     */
     @Override
-    public List<Integer> getCompatibleStates(List<Integer> stateDescription) {
+    public List<Integer> getCompatibleStates(List<Object> stateDescription) {
 
       List<Integer> compatibleStates = new ArrayList<>();
       List<List<Integer>> stateList = new ArrayList<>(stateSpace);
 
       for (int i=0; i<stateList.size(); i++) {
         List<Integer> state = stateList.get(i);
-        int z1LightLevelState = state.get(0);
-        int z2LightLevelState = state.get(1);
 
-        int z1LightLevel = Lab.z1Level.get(z1LightLevelState);
-        int z2LightLevel = Lab.z2Level.get(z2LightLevelState);
+        List<Object> substates = new ArrayList<>();
 
-        if (z1LightLevel == stateDescription.get(0) && z2LightLevel == stateDescription.get(1)) {
+        substates.add(Lab.z1Level.get(state.get(0)));
+        substates.add(Lab.z2Level.get(state.get(1)));
+        substates.add(Lab.z1Light.get(state.get(2)));
+        substates.add(Lab.z2Light.get(state.get(3)));
+        substates.add(Lab.z1Blinds.get(state.get(4)));
+        substates.add(Lab.z2Blinds.get(state.get(5)));
+        substates.add(Lab.sunshine.get(state.get(6)));
+
+        if (Collections.indexOfSubList(substates, stateDescription) != -1){
           compatibleStates.add(i);
           System.out.println(state);
-        }
+        };
       }
       return compatibleStates;
     }
@@ -318,7 +327,7 @@ public class Lab extends LearningEnvironment {
                   payload.put(propName, propValue);
                   TDHttpRequest request = new TDHttpRequest(f.get(), TD.invokeAction);
                   request.setObjectPayload((ObjectSchema) ds.get(), payload);
-                  Action action = new Action(affType, propName, propValue, request);
+                  Action action = new Action(affType, new Object[]{propName}, new Object[]{propValue}, request);
                   actionSpace.put(actionSpace.size(), action);
                 }
               }
@@ -387,8 +396,8 @@ public class Lab extends LearningEnvironment {
     private Action getApplicableAction(String stateAxis, Boolean stateValue) {
       return actionSpace.values()
         .stream().filter( v ->
-          stateAxis.equals(v.getRelatedAffordanceType()) &&
-          stateValue.equals(v.getPropertyValue()))
+          stateAxis.equals(v.getActionTag()) &&
+          Arrays.asList(v.getPayload()).contains(stateValue))
         .findFirst().get();
     }
 

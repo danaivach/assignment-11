@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.logging.*;
 import cartago.Artifact;
 import cartago.OPERATION;
+import cartago.OpFeedbackParam;
 
 public class QLearner extends Artifact {
 
@@ -59,12 +60,7 @@ public class QLearner extends Artifact {
   @OPERATION
   public void calculateQ(Object[] goalDescription , Object episodes, Object alpha, Object gamma, Object epsilon, Object reward) {
 
-
-    Integer[] goalDesc = new Integer[goalDescription.length];
-    for (int i = 0; i < goalDescription.length; i++) {
-            goalDesc[i] = Integer.valueOf(goalDescription[i].toString());
-        }
-    List<Integer> goalStateDescription = Arrays.asList(goalDesc);
+    List<Object> goalStateDescription = Arrays.asList(goalDescription);
 
     List<Integer> goalStates = this.lab.getCompatibleStates(goalStateDescription);
     LOGGER.info("Desired states: " + goalStates);
@@ -132,6 +128,10 @@ public class QLearner extends Artifact {
         return actionQPair;
     }
 
+    @OPERATION
+    public void getActionFromState(Object[] goalDescription, Object[] stateDescription, OpFeedbackParam<String> actionTag, OpFeedbackParam<Object[]> payloadTags, OpFeedbackParam<Object[]> payload) {
+
+    }
 
 
     /**

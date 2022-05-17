@@ -50,17 +50,21 @@ public abstract class LearningEnvironment {
 
   /**
   * Returns the states that are compatible to a given substate description.
-  * E.g., if the substate description is [3,3], then compatible states are
+  * <p>E.g., if the substate description is [3,3], then compatible states are
   * all the states described as [3,3,_,_,...,_].
+  * </p>
+  * <p>E.g., if the substate description is [3,3,false,false,true,true,2], then
+  * only compatible state is described as [3,3,0,0,1,1,2].
+  * </p>
   * <p>Each compatible state is represented as an integer value that corresponds to
-  * the position of the state in the state space set (e.g. the state [0,0,0,0,0,0,0]
-  * is represented by the value 0).
+  * the position of the state in the state space set (e.g. the state [0,0,0,0,0,0,1]
+  * is represented by the value 1).
   *</p>
   *
   * @param stateDescription the description of the substate
   * @return the list of integer values that represent the compatible states
   */
-  public abstract List<Integer> getCompatibleStates(List<Integer> stateDescription);
+  public abstract List<Integer> getCompatibleStates(List<Object> stateDescription);
 
   /**
   * Returns the current state of the environment.
