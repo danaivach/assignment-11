@@ -58,15 +58,15 @@ public class Lab extends LearningEnvironment {
 
   /**
   * z1Level: the level of light in Zone 1
-  * Possible values: 1,2,3
-  * Respective keys: 0,1,2
+  * Possible values: 0,1,2,3
+  * Respective keys: 0,1,2,3
   */
   private static final HashMap<Integer,Integer> z1Level = new HashMap<>();
 
   /**
   * z2Level: the level of light in Zone 2
-  * Possible values: 1,2,3
-  * Respective keys: 0,1,2
+  * Possible values: 0,1,2,3
+  * Respective keys: 0,1,2,3
   */
   private static final HashMap<Integer,Integer> z2Level = new HashMap<>();
 
@@ -100,8 +100,8 @@ public class Lab extends LearningEnvironment {
 
   /**
   * sunshine: the level of sunshine out of the lab
-  * Possible values: 1,2,3
-  * Respective keys: 0,1,2
+  * Possible values: 0,1,2,3
+  * Respective keys: 0,1,2,3
   */
   private static final HashMap<Integer,Integer> sunshine = new HashMap<>();
 
@@ -109,13 +109,11 @@ public class Lab extends LearningEnvironment {
 
   static {
 
-    z1Level.put(0,1);
-    z1Level.put(1,2);
-    z1Level.put(2,3);
-
-    z2Level.put(0,1);
-    z2Level.put(1,2);
-    z2Level.put(2,3);
+    for (int i=0; i<4; i++) {
+      z1Level.put(i,i);
+      z2Level.put(i,i);
+      sunshine.put(i,i);
+    }
 
     z1Light.put(0, false);
     z1Light.put(1, true);
@@ -128,10 +126,6 @@ public class Lab extends LearningEnvironment {
 
     z2Blinds.put(0, false);
     z2Blinds.put(1, true);
-
-    sunshine.put(0,1);
-    sunshine.put(1,2);
-    sunshine.put(2,3);
 
     };
 
@@ -165,6 +159,9 @@ public class Lab extends LearningEnvironment {
           ", value: " + action.getPropertyValue()
           );
         }
+
+        readCurrentState();
+        LOGGER.info("Initialized with current state: " + this.currentState);
 
       } catch (IOException e) {
         LOGGER.severe(e.getMessage());
@@ -225,15 +222,15 @@ public class Lab extends LearningEnvironment {
             boolean z1Blinds = (Boolean) status.get("http://example.org/was#Z1Blinds");
             boolean z2Blinds = (Boolean) status.get("http://example.org/was#Z2Blinds");
 
-            int sunshine = discretizeLightLevel((Double) status.get("http://example.org/was#Sunshine"));
+            int sunshine = discretizeSunshine((Double) status.get("http://example.org/was#Sunshine"));
 
-            currentState.set(0, z1Level-1);
-            currentState.set(1, z2Level-1);
+            currentState.set(0, z1Level);
+            currentState.set(1, z2Level);
             currentState.set(2, z1Light ? 1 : 0);
             currentState.set(3, z2Light ? 1 : 0);
             currentState.set(4, z1Blinds ? 1 : 0);
             currentState.set(5, z2Blinds ? 1 : 0);
-            currentState.set(6, sunshine-1);
+            currentState.set(6, sunshine);
 
           } catch (IOException e) {
             LOGGER.severe(e.getMessage());
@@ -332,11 +329,37 @@ public class Lab extends LearningEnvironment {
       setApplicableActions();
     }
 
-
+    /**
+    * Maps lux values to light levels:
+    * lux < 50 -> level 0
+    * lux in [50,100) -> level 1
+    * lux in [100,300) -> level 2
+    * lux >= 300 -> level 3
+    */
     private int discretizeLightLevel(Double value) {
-      if (value < 100) {
+      if (value < 50) {
+        return 0;
+      } else if (value < 100) {
         return 1;
-      } else if (value < 400) {
+      } else if (value < 300) {
+        return 2;
+      }
+      return 3;
+    }
+
+    /**
+    * Maps lux values to light levels:
+    * lux < 50 -> level 0
+    * lux in [50,200) -> level 1
+    * lux in [200,700) -> level 2
+    * lux >= 700 -> level 3
+    */
+    private int discretizeSunshine(Double value) {
+      if (value < 50) {
+        return 0;
+      } else if (value < 200) {
+        return 1;
+      } else if (value < 700) {
         return 2;
       }
       return 3;

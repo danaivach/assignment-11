@@ -10,5 +10,5 @@ learning_lab_environment("https://raw.githubusercontent.com/Interactions-HSG/exa
 @start
 +!start : learning_lab_environment(Url)
 <-
-  makeArtifact("qlearner", "tools.QLearner", [Url], QLearnerId);
-  calculateQ([2,2], 1.0, 0.1, 0.9, 3.0, 10.0).
+  makeArtifact("qlearner", "tools.QLearner", [Url], QLearnerId);.
+  //calculateQ([2,2], 1.0, 0.1, 0.9, 3.0, 10.0).
