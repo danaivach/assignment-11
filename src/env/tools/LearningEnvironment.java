@@ -49,6 +49,15 @@ public abstract class LearningEnvironment {
   }
 
   /**
+  * Returns an {@link Action} instance from the action space based on the given key
+  *
+  * @param action the action key
+  */
+  public Action getAction(int action) {
+    return actionSpace.get(action);
+  }
+
+  /**
   * Returns the states that are compatible to a given substate description.
   * <p>E.g., if the substate description is [3,3], then compatible states are
   * all the states described as [3,3,_,_,...,_].

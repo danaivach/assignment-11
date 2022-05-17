@@ -129,8 +129,27 @@ public class QLearner extends Artifact {
     }
 
     @OPERATION
-    public void getActionFromState(Object[] goalDescription, Object[] stateDescription, OpFeedbackParam<String> actionTag, OpFeedbackParam<Object[]> payloadTags, OpFeedbackParam<Object[]> payload) {
+    public void getActionFromState(Object[] goalDescription, Object[] stateDescription,
+      OpFeedbackParam<String> actionTag, OpFeedbackParam<Object[]> payloadTags,
+      OpFeedbackParam<Object[]> payload) {
 
+        List<Integer> goalStates = this.lab.getCompatibleStates(Arrays.asList(goalDescription));
+
+        double[][] qTable = qTables.get(goalStates.get(0));
+
+        List<Integer> currentState = this.lab.getCompatibleStates(Arrays.asList(stateDescription));
+
+        List<Integer> applicableActions = this.lab.getApplicableActions(currentState.get(0));
+
+        double[] actionQPair = maxQ(qTable, currentState.get(0), applicableActions);
+
+        Action a = this.lab.getAction((int) actionQPair[0]);
+
+        actionTag.set(a.getActionTag());
+
+        payloadTags.set(a.getPayloadTags());
+
+        payload.set(a.getPayload());
     }
 
 
