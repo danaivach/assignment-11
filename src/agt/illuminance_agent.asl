@@ -4,11 +4,13 @@
 * Real lab URL: "https://raw.githubusercontent.com/Interactions-HSG/example-tds/was/tds/interactions-lab.ttl"
 */
 learning_lab_environment("https://raw.githubusercontent.com/Interactions-HSG/example-tds/was/tds/interactions-lab.ttl").
+task_requirements([2,3]).
 
 !start.
 
 @start
-+!start : learning_lab_environment(Url)
++!start : learning_lab_environment(Url) & task_requirements([Z1Level, Z2Level])
 <-
-  makeArtifact("qlearner", "tools.QLearner", [Url], QLearnerId);.
-  //calculateQ([2,2], 1.0, 0.1, 0.9, 3.0, 10.0).
+  .print("Lab environment URL: ", Url);
+  .print("I want to achieve Z1Level=", Z1Level, " and Z2Level=",Z2Level)
+  .
