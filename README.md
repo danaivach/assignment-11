@@ -21,6 +21,9 @@ A template for an application implemented with the [JaCaMo 0.9](http://jacamo.so
 └── task.jcm
 ```
 
+### How to set up the simulator
+See instructions in [/simulator](/simulator).
+
 ### How to run the project
 Run with [Gradle 7.4](https://gradle.org/): 
 - MacOS and Linux: run the following command
