@@ -1,5 +1,11 @@
 package tools;
 
+import com.opencsv.CSVWriter;
+import java.io.IOException;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.util.stream.Collectors;
+import com.google.common.collect.Lists;
 import java.util.*;
 import java.util.logging.*;
 import cartago.Artifact;
@@ -60,7 +66,10 @@ public class QLearner extends Artifact {
   @OPERATION
   public void calculateQ(Object[] goalDescription , Object episodes, Object alpha, Object gamma, Object epsilon, Object reward) {
 
-    List<Object> goalStateDescription = Arrays.asList(goalDescription);
+    List<Object> goalStateDescription = new ArrayList<>();
+    for (int k=0; k<goalDescription.length ; k++) {
+      goalStateDescription.add(Integer.valueOf(goalDescription[k].toString()));
+    }
 
     List<Integer> goalStates = this.lab.getCompatibleStates(goalStateDescription);
     LOGGER.info("Desired states: " + goalStates);
@@ -68,11 +77,25 @@ public class QLearner extends Artifact {
     int currentState = this.lab.readCurrentState();
     LOGGER.info("Current state: " + currentState);
 
+    /*try {
+      Thread.sleep(1000);
+    } catch (InterruptedException exception) {
+      LOGGER.severe(exception.getMessage());
+    }*/
+
     double[][] qTable = initializeQTable();
 
     Random rd = new Random();
 
+    int rounds = 0;
+
     for (int e=0; e< Integer.valueOf(episodes.toString()); e++) {
+
+      // Used for debugging
+      resetFrom(currentState);
+      currentState = this.lab.readCurrentState();
+      LOGGER.info("Starting episode: " + e + ", current state:" + currentState);
+      int assignedReward;
 
       while(!goalStates.contains(currentState)) {
 
@@ -88,13 +111,31 @@ public class QLearner extends Artifact {
         }
 
         this.lab.performAction(action);
-        //LOGGER.info("Performed action: " + action);
+        try {
+          Thread.sleep(60000);
+        } catch (InterruptedException exception) {
+          LOGGER.severe(exception.getMessage());
+        }
+
+
+        LOGGER.info("Round: " + ++rounds);
 
         currentState = this.lab.readCurrentState();
+        try {
+          Thread.sleep(10000);
+        } catch (InterruptedException exception) {
+          LOGGER.severe(exception.getMessage());
+        }
         //LOGGER.info("Current state: " + currentState);
 
         Double a = Double.valueOf(alpha.toString());
-        qTable[currentState][action] = (1-a)*qTable[currentState][action] + a*((Double.valueOf(reward.toString()) + ((double) gamma)*maxQ(qTable, currentState, applicableActions)[1]));
+
+        if (goalStates.contains(currentState)) {
+          assignedReward = Integer.valueOf(reward.toString());
+        } else {
+          assignedReward = 0;
+        }
+        qTable[currentState][action] = (1-a)*qTable[currentState][action] + a*(assignedReward + (((double) gamma)*maxQ(qTable, currentState, applicableActions)[1]));
 
       }
     }
@@ -103,6 +144,23 @@ public class QLearner extends Artifact {
     printQTable(qTable);
     for (int goalState : goalStates) {
       qTables.put(goalState, qTable);
+    }
+
+    // Used for debugging
+    resetFrom(currentState);
+  }
+
+  // SOLUTION - used for debugging
+  private void resetFrom(int currentState) {
+    List<Integer> actions = this.lab.getApplicableActions(currentState);
+
+    for (int action : actions) {
+      this.lab.performAction(action);
+      try {
+        Thread.sleep(10000);
+      } catch (InterruptedException exception) {
+        LOGGER.severe(exception.getMessage());
+      }
     }
   }
 
@@ -167,6 +225,37 @@ public class QLearner extends Artifact {
       }
       System.out.println();
     }
+
+    int len1 = qTable.length;
+    int len2 = qTable[0].length;
+
+    // row, col
+    List<List<String>> stringTable = new ArrayList<>();
+
+    for (int i=0; i<len1; i++) {
+      List<String> row = new ArrayList<>();
+      for (int j=0; j<len2; j++) {
+        row.add(String.valueOf(qTable[i][j]));
+      }
+      stringTable.add(row);
+    }
+
+    try {
+
+      String csv = "output.csv";
+      CSVWriter writer = null;
+
+      writer = new CSVWriter(new FileWriter(csv));
+
+      for(List<String> each: stringTable){
+        writer.writeNext(each.toArray(new String[each.size()]));
+      }
+      writer.close();
+
+    } catch (IOException e) {
+      LOGGER.severe(e.getMessage());
+    }
+
   }
 
   /**

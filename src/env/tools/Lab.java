@@ -1,5 +1,8 @@
 package tools;
 
+import java.util.stream.Collectors;
+import java.io.FileWriter;
+import com.opencsv.CSVWriter;
 import java.io.IOException;
 import org.gradle.internal.impldep.com.google.common.collect.ImmutableSet;
 import java.util.*;
@@ -165,7 +168,9 @@ public class Lab extends LearningEnvironment {
 
         // Read the current state
         readCurrentState();
-        LOGGER.info("The lab current state: " + this.currentState);
+
+        List<Object> stateDescription = Arrays.asList(2,3);
+        LOGGER.info("compatible states: " + getCompatibleStates(stateDescription));
 
       } catch (IOException e) {
         LOGGER.severe(e.getMessage());
@@ -240,7 +245,7 @@ public class Lab extends LearningEnvironment {
             currentState.set(4, z1Blinds ? 1 : 0);
             currentState.set(5, z2Blinds ? 1 : 0);
             currentState.set(6, sunshine);
-
+            LOGGER.info("The lab current state: " + this.currentState);
           } catch (IOException e) {
             LOGGER.severe(e.getMessage());
           }
@@ -387,6 +392,33 @@ public class Lab extends LearningEnvironment {
                     ImmutableSet.copyOf(z2Blinds.keySet()),
                     ImmutableSet.copyOf(sunshine.keySet())
                     );
+                    // row, col
+
+    List<List<Integer>> stateList = new ArrayList<>(stateSpace);
+    List<String> states = new ArrayList<>();
+    for (int i=0; i<stateList.size(); i++) {
+      String str = stateList.get(i).stream().map(e -> String.valueOf(e)).collect(Collectors.joining());
+      states.add(str);
+    }
+
+
+
+    try {
+
+      String csv = "states.csv";
+      CSVWriter writer = null;
+
+      writer = new CSVWriter(new FileWriter(csv));
+
+      for(String each: states){
+        String[] state = new String[] {each};
+        writer.writeNext(state);
+      }
+      writer.close();
+
+    } catch (IOException e) {
+      LOGGER.severe(e.getMessage());
+    }
     }
 
 
