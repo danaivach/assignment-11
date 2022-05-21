@@ -71,55 +71,62 @@ public class QLearner extends Artifact {
       goalStateDescription.add(Integer.valueOf(goalDescription[k].toString()));
     }
 
+    // Read compatible states
     List<Integer> goalStates = this.lab.getCompatibleStates(goalStateDescription);
     LOGGER.info("Desired states: " + goalStates);
 
+    // Read current state
     int currentState = this.lab.readCurrentState();
     LOGGER.info("Current state: " + currentState);
 
-    /*try {
-      Thread.sleep(1000);
-    } catch (InterruptedException exception) {
-      LOGGER.severe(exception.getMessage());
-    }*/
+    int intEpisodes = Integer.valueOf(episodes.toString());
+    Double doubleAlpha = Double.valueOf(alpha.toString());
+    Double doubleGamma = Double.valueOf(gamma.toString());
+    Double doubleEpsilon = Double.valueOf(epsilon.toString());
+    int intReward = Integer.valueOf(reward.toString());
 
+    // Init Q matrix
     double[][] qTable = initializeQTable();
 
     Random rd = new Random();
 
     int rounds = 0;
 
-    for (int e=0; e< Integer.valueOf(episodes.toString()); e++) {
+    int assignedReward;
+    int action;
 
-      // Used for debugging
+    for (int e=0; e< intEpisodes; e++) {
+
+      // Randomize initial state
       resetFrom(currentState);
+
+      // Read current state
       currentState = this.lab.readCurrentState();
       LOGGER.info("Starting episode: " + e + ", current state:" + currentState);
-      int assignedReward;
 
       while(!goalStates.contains(currentState)) {
 
+        // Get applicable actions
         List<Integer> applicableActions =  this.lab.getApplicableActions(currentState);
         //LOGGER.info("Applicable actions: " + applicableActions);
 
-        int action;
-        if (rd.nextDouble() < Double.valueOf(epsilon.toString())){
+        if (rd.nextDouble() < doubleEpsilon){
           int randomIndex = rd.nextInt(applicableActions.size());
           action = applicableActions.get(randomIndex);
         } else {
           action = (int) maxQ(qTable, currentState, applicableActions)[0];
         }
 
+        // Perform action
         this.lab.performAction(action);
         try {
           Thread.sleep(60000);
         } catch (InterruptedException exception) {
           LOGGER.severe(exception.getMessage());
         }
-
-
         LOGGER.info("Round: " + ++rounds);
 
+        // Read current state
         currentState = this.lab.readCurrentState();
         try {
           Thread.sleep(10000);
@@ -128,14 +135,15 @@ public class QLearner extends Artifact {
         }
         //LOGGER.info("Current state: " + currentState);
 
-        Double a = Double.valueOf(alpha.toString());
-
+        // Assign reward
         if (goalStates.contains(currentState)) {
-          assignedReward = Integer.valueOf(reward.toString());
+          assignedReward = intReward;
         } else {
           assignedReward = 0;
         }
-        qTable[currentState][action] = (1-a)*qTable[currentState][action] + a*(assignedReward + (((double) gamma)*maxQ(qTable, currentState, applicableActions)[1]));
+
+        // Update Q matrix
+        qTable[currentState][action] = (1-doubleAlpha)*qTable[currentState][action] + doubleAlpha*(assignedReward + (doubleGamma*maxQ(qTable, currentState, applicableActions)[1]));
 
       }
     }
@@ -146,7 +154,7 @@ public class QLearner extends Artifact {
       qTables.put(goalState, qTable);
     }
 
-    // Used for debugging
+    // Randomize state
     resetFrom(currentState);
   }
 
