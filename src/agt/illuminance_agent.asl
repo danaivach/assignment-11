@@ -26,7 +26,7 @@ task_requirements([0,0]).
   ?current_status(Status); */
 
   makeArtifact("qlearner", "tools.QLearner", [Url], QLearnerId);
-  calculateQ(GoalStatus, 20, 0.1, 0.7, 0.3, 10.0);
+  calculateQ(GoalStatus, 10, 0.1, 0.7, 0.3, 10.0);
 
 .
 

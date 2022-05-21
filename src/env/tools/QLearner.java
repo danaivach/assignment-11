@@ -157,7 +157,7 @@ public class QLearner extends Artifact {
     for (int action : actions) {
       this.lab.performAction(action);
       try {
-        Thread.sleep(10000);
+        Thread.sleep(60000);
       } catch (InterruptedException exception) {
         LOGGER.severe(exception.getMessage());
       }
